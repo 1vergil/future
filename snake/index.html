@@ -161,7 +161,7 @@
     const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
     const hitWall = head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID;
-    const hitSelf = snake.some(s => s.x === head.x && s.y === head.y);
+    const hitSelf = snake.slice(0, -1).some(s => s.x === head.x && s.y === head.y);
     if (hitWall || hitSelf) return gameOver();
 
     snake.unshift(head);
@@ -181,14 +181,18 @@
     draw();
   }
 
-  function gameOver() {
-    running = false;
-    clearInterval(timer);
+  function saveBest() {
     if (score > best) {
       best = score;
       localStorage.setItem('snake-best', best);
       bestEl.textContent = best;
     }
+  }
+
+  function gameOver() {
+    running = false;
+    clearInterval(timer);
+    saveBest();
     overlayTitle.textContent = '游戏结束';
     overlayText.innerHTML = `得分：${score}<br>最高分：${best}`;
     startBtn.textContent = '再来一局';
@@ -198,6 +202,7 @@
   function win() {
     running = false;
     clearInterval(timer);
+    saveBest();
     overlayTitle.textContent = '你赢了！';
     overlayText.textContent = `满分：${score}`;
     startBtn.textContent = '再来一局';
@@ -254,7 +259,7 @@
     if (map[e.key]) {
       e.preventDefault();
       if (!running) start();
-      else setDir(map[e.key]);
+      setDir(map[e.key]);
     } else if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
       e.preventDefault();
       running ? togglePause() : start();
@@ -264,7 +269,7 @@
   document.querySelectorAll('.controls button').forEach(btn =>
     btn.addEventListener('click', () => {
       if (!running) start();
-      else setDir(btn.dataset.dir);
+      setDir(btn.dataset.dir);
     })
   );
 
